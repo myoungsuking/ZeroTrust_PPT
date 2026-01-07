@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="utf-8"/>
-    <meta content="width=1280, height=720, initial-scale=1.0" name="viewport"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes"/>
     <title>클라우드시큐어 김명수</title>
     <link rel="icon" type="image/png" href="./assets/favicon.png"/>
     <!-- Fonts -->
@@ -28,6 +28,9 @@
             overflow: hidden;
             width: 100vw;
             height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         .font-tech {
@@ -113,8 +116,23 @@
         /* Presentation Container */
         .presentation-container {
             position: relative;
-            width: 100%;
-            height: 100%;
+            width: 1280px;
+            height: 720px;
+            transform-origin: center center;
+            transition: transform 0.3s ease;
+        }
+
+        /* Mobile responsive scaling */
+        @media (max-width: 1280px) {
+            .presentation-container {
+                transform: scale(var(--scale-factor, 1));
+            }
+        }
+
+        @media (max-height: 720px) {
+            .presentation-container {
+                transform: scale(var(--scale-factor, 1));
+            }
         }
 
         .slide-content {
@@ -178,6 +196,27 @@
             cursor: pointer;
             transition: all 0.3s ease;
             font-size: 18px;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .navigation-controls {
+                bottom: 20px;
+                padding: 10px 20px;
+                gap: 15px;
+            }
+
+            .nav-button {
+                width: 50px;
+                height: 50px;
+                font-size: 20px;
+            }
+
+            .slide-counter {
+                font-size: 14px;
+            }
         }
 
         .nav-button:hover:not(:disabled) {
@@ -303,6 +342,28 @@
     </div>
 
     <script>
+        // Mobile responsive scaling
+        function updateScale() {
+            const container = document.querySelector('.presentation-container');
+            const windowWidth = window.innerWidth;
+            const windowHeight = window.innerHeight;
+            const containerWidth = 1280;
+            const containerHeight = 720;
+            
+            const scaleX = windowWidth / containerWidth;
+            const scaleY = windowHeight / containerHeight;
+            const scale = Math.min(scaleX, scaleY, 1); // Don't scale up, only down
+            
+            document.documentElement.style.setProperty('--scale-factor', scale);
+        }
+
+        // Update scale on load and resize
+        window.addEventListener('load', updateScale);
+        window.addEventListener('resize', updateScale);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(updateScale, 100);
+        });
+
         let currentSlideIndex = 0;
         const totalSlides = 13;
         const slide1Content = document.getElementById('slide1');
@@ -311,6 +372,33 @@
         // 나머지 슬라이드 요소들을 배열에 추가
         for (let i = 2; i <= totalSlides; i++) {
             slides.push(document.getElementById(`slide${i}`));
+        }
+
+        // Touch gesture support
+        let touchStartX = 0;
+        let touchEndX = 0;
+        const minSwipeDistance = 50;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            const swipeDistance = touchStartX - touchEndX;
+            if (Math.abs(swipeDistance) > minSwipeDistance) {
+                if (swipeDistance > 0) {
+                    // Swipe left - next slide
+                    nextSlide();
+                } else {
+                    // Swipe right - previous slide
+                    previousSlide();
+                }
+            }
         }
 
         // 슬라이드 표시 함수
@@ -465,6 +553,7 @@
 
         // 초기화
         window.addEventListener('load', () => {
+            updateScale();
             showSlide(0);
         });
     </script>
