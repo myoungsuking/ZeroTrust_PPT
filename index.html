@@ -107,8 +107,8 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 1280px;
+            height: 720px;
             z-index: 0;
             opacity: 0.4;
         }
@@ -246,7 +246,7 @@
     <div class="presentation-container">
         <!-- 첫 번째 슬라이드 (직접 포함) -->
         <div class="slide-content active" id="slide1">
-            <div class="relative w-[1280px] h-[720px] flex flex-col items-center justify-between py-12 text-white overflow-hidden" style="width: 100vw; height: 100vh; max-width: 100%; max-height: 100%;">
+            <div class="relative w-full h-full flex flex-col items-center justify-between py-12 text-white overflow-hidden">
                 <!-- Company Logo (Top Right) -->
                 <div class="absolute top-8 right-10 z-30">
                     <img alt="HIPERLAB Logo" class="h-8 object-contain drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]" src="./assets/image-Photoroom.png"/>
@@ -464,8 +464,8 @@
         const canvas = document.getElementById('bgCanvas');
         if (canvas) {
             const ctx = canvas.getContext('2d');
-            canvas.width = canvas.offsetWidth;
-            canvas.height = canvas.offsetHeight;
+            canvas.width = 1280;
+            canvas.height = 720;
 
             const particles = [];
             const particleCount = 60;
