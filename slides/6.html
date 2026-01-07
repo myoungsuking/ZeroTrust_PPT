@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=1280, height=720, initial-scale=1.0" name="viewport"/>
+<title>Access Decision Flow</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&amp;family=Rajdhani:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+<style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #020617; /* Very Dark Blue */
+            font-family: 'Noto Sans KR', sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Neon Effects */
+        .neon-text {
+            text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+        }
+
+        .step-circle {
+            background-color: #0f172a;
+            border: 2px solid #1e293b;
+            transition: all 0.3s ease;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.5);
+        }
+
+        .step-circle.active {
+            border-color: #22d3ee;
+            box-shadow: 0 0 20px rgba(34, 211, 238, 0.3), inset 0 0 10px rgba(34, 211, 238, 0.1);
+        }
+
+        .step-circle:hover {
+            transform: translateY(-5px);
+            border-color: #a855f7; /* Purple on hover */
+            box-shadow: 0 0 20px rgba(168, 85, 247, 0.4);
+        }
+
+        .connector-line {
+            height: 3px;
+            background-color: #1e293b;
+            position: relative;
+            z-index: 0;
+            overflow: hidden;
+        }
+
+        .connector-progress {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 100%;
+            background-color: #22d3ee;
+            transform: translateX(-100%);
+            animation: flowProgress 3s linear infinite;
+        }
+
+        @keyframes flowProgress {
+            0% { transform: translateX(-100%); }
+            50% { transform: translateX(0%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .step-number {
+            position: absolute;
+            top: -10px;
+            right: -5px;
+            width: 24px;
+            height: 24px;
+            background-color: #0f172a;
+            border: 1px solid #22d3ee;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Rajdhani', sans-serif;
+            font-weight: bold;
+            font-size: 14px;
+            color: #22d3ee;
+            z-index: 20;
+        }
+
+        /* Background Canvas */
+        #bgCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        /* Glass Panel for Bottom Message */
+        .glass-message {
+            background-color: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+            border-left: 4px solid #22d3ee;
+        }
+
+        /* Step Card Container */
+        .step-card {
+            width: 130px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+            z-index: 10;
+        }
+
+        /* Arrow Icon between steps */
+        .arrow-next {
+            color: #334155;
+            font-size: 1.2rem;
+            animation: pulseArrow 2s infinite;
+        }
+
+        @keyframes pulseArrow {
+            0%, 100% { color: #334155; opacity: 0.5; }
+            50% { color: #22d3ee; opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+<!-- Increased bottom padding to accommodate Logo and Page Number -->
+<div class="relative w-[1280px] h-[720px] flex flex-col pt-12 px-12 pb-24 overflow-hidden">
+<!-- Background Canvas -->
+<canvas height="720" id="bgCanvas" width="1280"></canvas>
+<!-- Logo (Moved to Top Right, Resized) -->
+<div class="absolute top-12 right-12 z-50">
+<img alt="HIPERLAB" class="h-12 object-contain opacity-90 drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]" src="../assets/image-Photoroom.png"/>
+</div>
+<!-- Header -->
+<div class="z-10 flex flex-col mb-10">
+<h2 class="font-tech text-cyan-400 tracking-[0.2em] text-lg font-bold uppercase mb-1">
+                Access Decision Flow
+            </h2>
+<h1 class="text-4xl font-bold text-white mb-2">
+                모든 요청은 이렇게 판단됩니다
+            </h1>
+<div class="h-1 w-20 bg-cyan-500 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.6)]"></div>
+</div>
+<!-- Main Flow Diagram -->
+<div class="z-10 flex-1 flex flex-col justify-center mb-4 relative">
+<!-- Connector Line Background -->
+<div class="absolute top-[40px] left-[65px] right-[65px] connector-line">
+<!-- Animated Progress Line -->
+<div class="connector-progress"></div>
+</div>
+<!-- Steps Container -->
+<div class="flex justify-between items-start w-full px-2">
+<!-- Step 1: User Request -->
+<div class="step-card group">
+<div class="step-circle active w-20 h-20 rounded-full flex items-center justify-center mb-4 relative z-10">
+<i class="fa-solid fa-user text-2xl text-white group-hover:text-cyan-400 transition-colors"></i>
+<div class="step-number">1</div>
+</div>
+<div class="text-center">
+<h3 class="text-cyan-400 font-tech font-bold text-lg leading-tight mb-1">USER<br/>REQUEST</h3>
+<p class="text-gray-400 text-xs">최초 접속 요청</p>
+</div>
+</div>
+<!-- Arrow -->
+<div class="mt-8 arrow-next"><i class="fa-solid fa-chevron-right"></i></div>
+<!-- Step 2: Device Posture -->
+<div class="step-card group">
+<div class="step-circle active w-20 h-20 rounded-full flex items-center justify-center mb-4 relative z-10">
+<i class="fa-solid fa-laptop-medical text-2xl text-white group-hover:text-cyan-400 transition-colors"></i>
+<div class="step-number">2</div>
+</div>
+<div class="text-center">
+<h3 class="text-white font-tech font-bold text-lg leading-tight mb-1">DEVICE<br/>POSTURE</h3>
+<p class="text-gray-400 text-xs">단말 상태 무결성 검증</p>
+</div>
+</div>
+<!-- Arrow -->
+<div class="mt-8 arrow-next"><i class="fa-solid fa-chevron-right"></i></div>
+<!-- Step 3: Identity Auth -->
+<div class="step-card group">
+<div class="step-circle active w-20 h-20 rounded-full flex items-center justify-center mb-4 relative z-10">
+<i class="fa-solid fa-fingerprint text-2xl text-white group-hover:text-cyan-400 transition-colors"></i>
+<div class="step-number">3</div>
+</div>
+<div class="text-center">
+<h3 class="text-white font-tech font-bold text-lg leading-tight mb-1">IDENTITY<br/>AUTH</h3>
+<p class="text-gray-400 text-xs">MFA 및 신원 확인</p>
+</div>
+</div>
+<!-- Arrow -->
+<div class="mt-8 arrow-next"><i class="fa-solid fa-chevron-right"></i></div>
+<!-- Step 4: ZTNA Connection -->
+<div class="step-card group">
+<div class="step-circle active w-20 h-20 rounded-full flex items-center justify-center mb-4 relative z-10">
+<i class="fa-solid fa-link text-2xl text-white group-hover:text-cyan-400 transition-colors"></i>
+<div class="step-number">4</div>
+</div>
+<div class="text-center">
+<h3 class="text-white font-tech font-bold text-lg leading-tight mb-1">ZTNA<br/>TUNNEL</h3>
+<p class="text-gray-400 text-xs">암호화된 연결 수립</p>
+</div>
+</div>
+<!-- Arrow -->
+<div class="mt-8 arrow-next"><i class="fa-solid fa-chevron-right"></i></div>
+<!-- Step 5: Access Control Decision -->
+<div class="step-card group">
+<div class="step-circle w-24 h-24 -mt-2 rounded-full flex items-center justify-center mb-2 relative z-10 bg-gray-900 border-cyan-500 shadow-[0_0_20px_rgba(34,211,238,0.4)]">
+<i class="fa-solid fa-scale-balanced text-4xl text-cyan-400 group-hover:text-white transition-colors"></i>
+<div class="step-number" style="width: 28px; height: 28px; font-size: 16px; border-color: white; color: white;">5</div>
+</div>
+<div class="text-center">
+<h3 class="text-cyan-300 font-tech font-bold text-xl leading-tight mb-1">DECISION</h3>
+<p class="text-gray-300 text-xs font-bold">정책 기반 허용/차단</p>
+</div>
+</div>
+<!-- Arrow -->
+<div class="mt-8 arrow-next"><i class="fa-solid fa-chevron-right"></i></div>
+<!-- Step 6: Data/App Access -->
+<div class="step-card group">
+<div class="step-circle active w-20 h-20 rounded-full flex items-center justify-center mb-4 relative z-10">
+<i class="fa-solid fa-server text-2xl text-white group-hover:text-cyan-400 transition-colors"></i>
+<div class="step-number">6</div>
+</div>
+<div class="text-center">
+<h3 class="text-white font-tech font-bold text-lg leading-tight mb-1">RESOURCE<br/>ACCESS</h3>
+<p class="text-gray-400 text-xs">데이터 및 앱 접근</p>
+</div>
+</div>
+<!-- Arrow -->
+<div class="mt-8 arrow-next"><i class="fa-solid fa-chevron-right"></i></div>
+<!-- Step 7: Audit & Monitoring -->
+<div class="step-card group">
+<div class="step-circle active w-20 h-20 rounded-full flex items-center justify-center mb-4 relative z-10">
+<i class="fa-solid fa-clipboard-check text-2xl text-white group-hover:text-cyan-400 transition-colors"></i>
+<div class="step-number">7</div>
+</div>
+<div class="text-center">
+<h3 class="text-white font-tech font-bold text-lg leading-tight mb-1">AUDIT &amp;<br/>LOGGING</h3>
+<p class="text-gray-400 text-xs">모든 행위 기록</p>
+</div>
+</div>
+</div>
+<!-- Flow Labels -->
+<div class="absolute -top-10 left-0 w-full flex justify-between px-10 pointer-events-none opacity-50">
+<div class="text-[10px] text-cyan-500 font-tech uppercase tracking-widest border-b border-cyan-500 pb-1 w-[40%]">Verification Phase</div>
+<div class="text-[10px] text-purple-500 font-tech uppercase tracking-widest border-b border-purple-500 pb-1 w-[20%] text-center">Control Phase</div>
+<div class="text-[10px] text-green-500 font-tech uppercase tracking-widest border-b border-green-500 pb-1 w-[30%] text-right">Access Phase</div>
+</div>
+</div>
+<!-- Footer Message -->
+<div class="z-10 mt-auto w-full">
+<div class="glass-message p-6 rounded-lg flex items-center justify-between">
+<div class="flex items-center">
+<div class="w-12 h-12 bg-cyan-900/50 rounded-full flex items-center justify-center mr-4 border border-cyan-500/30">
+<i class="fa-solid fa-rotate text-cyan-400 text-xl animate-spin-slow" style="animation-duration: 4s;"></i>
+</div>
+<div>
+<p class="text-gray-400 text-xs font-tech uppercase tracking-wider mb-1">Continuous Validation</p>
+<p class="text-xl text-white font-medium">
+                            Zero Trust의 핵심은 구조가 아니라 <span class="text-cyan-400 font-bold">흐름(Flow)</span>입니다. 
+                            <span class="text-sm text-gray-400 ml-2 font-normal">모든 요청은 매 단계에서 다시 판단됩니다.</span>
+</p>
+</div>
+</div>
+<div class="flex space-x-2">
+<span class="px-3 py-1 bg-gray-800 rounded text-xs text-gray-400 font-tech border border-gray-700">Request ID: <span class="text-cyan-500">#REQ-8291</span></span>
+<span class="px-3 py-1 bg-gray-800 rounded text-xs text-green-400 font-tech border border-gray-700"><i class="fa-solid fa-circle text-[8px] mr-1"></i>Active</span>
+</div>
+</div>
+</div>
+</div>
+<script>
+        // Tech Background Animation
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const particles = [];
+        const particleCount = 40;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = Math.random() * 0.5 - 0.25;
+                this.speedY = Math.random() * 0.5 - 0.25;
+                this.color = Math.random() > 0.5 ? 'rgba(34, 211, 238, ' : 'rgba(168, 85, 247, '; // Cyan or Purple base
+                this.alpha = Math.random() * 0.5 + 0.1;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+
+            draw() {
+                ctx.fillStyle = this.color + this.alpha + ')';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw subtle grid
+            ctx.strokeStyle = 'rgba(30, 41, 59, 0.3)';
+            ctx.lineWidth = 1;
+            const step = 60;
+            
+            for(let x = 0; x <= canvas.width; x += step) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for(let y = 0; y <= canvas.height; y += step) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Draw particles
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

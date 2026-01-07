@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="ko" data-theme="light" style=""><head>
+<meta charset="utf-8">
+<meta content="width=1280, height=720, initial-scale=1.0" name="viewport"/>
+<title>Zero Trust Architecture Overview</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect">
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&amp;family=Rajdhani:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+<!-- Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<!-- Tailwind CSS -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+<style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #020617; /* Very Dark Blue */
+            font-family: 'Noto Sans KR', sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Custom Glow Effects */
+        .hub-glow {
+            box-shadow: 0 0 50px rgba(34, 211, 238, 0.25), inset 0 0 20px rgba(34, 211, 238, 0.15);
+            border: 2px solid rgba(34, 211, 238, 0.7);
+            background-color: rgba(15, 23, 42, 0.95);
+        }
+
+        .node-glow {
+            box-shadow: 0 0 25px rgba(99, 102, 241, 0.25);
+            border: 1px solid rgba(99, 102, 241, 0.5);
+            background-color: rgba(30, 41, 59, 0.95);
+            transition: all 0.3s ease;
+        }
+
+        .policy-badge {
+            background-color: #0f172a;
+            border: 1px solid #22d3ee;
+            color: #22d3ee;
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.4);
+        }
+
+        /* Custom Animation Definition */
+        @keyframes pulse-slow {
+            0%, 100% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            50% { opacity: 0.9; transform: translate(-50%, -50%) scale(0.98); }
+        }
+        
+        @keyframes ping-slow {
+            0% { transform: scale(1); opacity: 0.8; }
+            75%, 100% { transform: scale(1.5); opacity: 0; }
+        }
+
+        .animate-pulse-slow {
+            animation: pulse-slow 4s ease-in-out infinite;
+        }
+
+        .animate-ping-custom {
+            animation: ping-slow 3s cubic-bezier(0, 0, 0.2, 1) infinite;
+        }
+
+        /* Layout Positioning */
+        .slide-container {
+            position: relative;
+            overflow: hidden;
+            background-color: #020617;
+            width: 1280px;
+            height: 720px;
+            transform: none;
+        }
+
+        .diagram-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 20;
+            pointer-events: none;
+        }
+
+        .hub {
+            position: absolute;
+            z-index: 30;
+            width: 230px; 
+            height: 230px; 
+            border-radius: 50%;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: auto;
+        }
+
+        .satellite {
+            position: absolute;
+            z-index: 30;
+            width: 170px;
+            padding: 10px;
+            border-radius: 14px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            backdrop-filter: blur(10px);
+            pointer-events: auto;
+        }
+
+        /* Satellite Positions */
+        .sat-tl { top: 25%; left: 18%; } 
+        .sat-tr { top: 25%; right: 18%; }
+        .sat-bl { bottom: 25%; left: 18%; }
+        .sat-br { bottom: 25%; right: 18%; }
+
+        /* Canvas Layers */
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        #bgCanvas { z-index: 0; }
+        #linesCanvas { z-index: 10; pointer-events: none; }
+
+    </style>
+</head>
+<body style="">
+<!-- Main Slide Container with Inline Fixed Dimensions -->
+<div class="slide-container relative w-[1280px] h-[720px]" id="slideContainer">
+<!-- Canvases -->
+<canvas height="720" id="bgCanvas" width="1280"></canvas>
+<canvas height="720" id="linesCanvas" width="1280"></canvas>
+<!-- Logo (Top Right) -->
+<div class="absolute right-12 top-12 z-50">
+<img alt="HIPERLAB Logo" class="h-12 w-auto object-contain opacity-90" src="../assets/image-Photoroom.png"/>
+</div>
+<!-- Header -->
+<div class="absolute top-12 left-12 z-40 flex flex-col items-start">
+<h2 class="font-tech text-cyan-400 tracking-[0.2em] text-lg font-bold uppercase mb-1">
+                Zero Trust Architecture
+            </h2>
+<h1 class="text-4xl font-bold text-white mb-2">
+                전체 아키텍처 개요
+            </h1>
+<div class="h-1 w-20 bg-cyan-500 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.6)]"></div>
+<p class="mt-4 text-gray-400 text-lg">
+                Identity &amp; Policy 중심 통제 구조
+            </p>
+</div>
+<!-- Diagram Elements -->
+<div class="diagram-layer">
+<!-- Central Hub: Identity & Policy -->
+<div class="hub hub-glow animate-pulse-slow" id="hubElement">
+<!-- Badge -->
+<div class="absolute -top-10 policy-badge px-4 py-1 rounded-full text-[10px] font-bold font-tech tracking-wider uppercase bg-gray-900 z-40">
+                    Policy Engine
+                </div>
+<div class="mb-1 relative">
+<i class="fa-solid fa-fingerprint text-5xl text-cyan-400 drop-shadow-[0_0_15px_rgba(34,211,238,0.8)]"></i>
+<div class="absolute -bottom-1 -right-1 bg-purple-600 rounded-full p-1 w-6 h-6 flex items-center justify-center border border-white">
+<i class="fa-solid fa-robot text-[10px] text-white"></i>
+</div>
+</div>
+<h3 class="text-xl font-bold text-white font-tech mb-0">IDENTITY</h3>
+<p class="text-cyan-400 text-[10px] font-bold mb-2">Access Control</p>
+<!-- Buttons inside Hub -->
+<div class="flex gap-1.5 justify-center w-full px-2">
+<span class="text-[8px] bg-cyan-900/80 text-cyan-200 px-2 py-1 rounded border border-cyan-500/30 whitespace-nowrap">Okta</span>
+<span class="text-[8px] bg-purple-900/80 text-purple-200 px-2 py-1 rounded border border-purple-500/30 whitespace-nowrap">QueryPie AI</span>
+</div>
+<!-- Animated Rings -->
+<div class="absolute inset-0 rounded-full border border-cyan-500/20 animate-ping-custom" style="animation-duration: 3s;"></div>
+<div class="absolute inset-[-10px] rounded-full border border-purple-500/10 animate-ping-custom" style="animation-duration: 4s; animation-delay: 1s;"></div>
+</div>
+<!-- Satellite Nodes -->
+<!-- Node 1: Cloud -->
+<div class="satellite node-glow sat-tl" data-color="#60a5fa">
+<div class="w-8 h-8 bg-blue-900/50 rounded-full flex items-center justify-center mb-1.5 border border-blue-500/50">
+<i class="fa-solid fa-cloud text-base text-blue-400"></i>
+</div>
+<h4 class="text-sm font-bold text-white mb-0">Cloud</h4>
+<p class="text-[9px] text-gray-400 mb-1.5">AWS · Azure · GCP</p>
+<div class="w-full h-1 bg-gray-700 rounded-full overflow-hidden">
+
+</div>
+</div>
+<!-- Node 2: SaaS -->
+<div class="satellite node-glow sat-tr" data-color="#f472b6">
+<div class="w-8 h-8 bg-pink-900/50 rounded-full flex items-center justify-center mb-1.5 border border-pink-500/50">
+<i class="fa-brands fa-slack text-base text-pink-400"></i>
+</div>
+<h4 class="text-sm font-bold text-white mb-0">SaaS Apps</h4>
+<p class="text-[9px] text-gray-400 mb-1.5">Slack · Jira · GitHub</p>
+
+</div>
+<!-- Node 3: Infrastructure -->
+<div class="satellite node-glow sat-bl" data-color="#818cf8">
+<div class="w-8 h-8 bg-indigo-900/50 rounded-full flex items-center justify-center mb-1.5 border border-indigo-500/50">
+<i class="fa-solid fa-server text-base text-indigo-400"></i>
+</div>
+<h4 class="text-sm font-bold text-white mb-0">Infrastructure</h4>
+<p class="text-[9px] text-gray-400 mb-1.5">On-Prem · K8s</p>
+</div><div class="satellite node-glow sat-br" data-color="#34d399"><div class="w-8 h-8 bg-emerald-900/50 rounded-full flex items-center justify-center mb-1.5 border border-emerald-500/50"><i class="fa-solid fa-database text-base text-emerald-400"><br></i>
+</div>
+<h4 class="text-sm font-bold text-white mb-0">Database</h4>
+<p class="text-[9px] text-gray-400 mb-1.5">Sensitive Data</p>
+
+</div>
+<!-- Footer Key Points (Updated Colors & Items) -->
+<div class="absolute bottom-4 left-0 w-full z-40 flex items-center justify-center space-x-6 pointer-events-none">
+<!-- Blue: Cloud -->
+<div class="flex items-center text-gray-300 text-[11px] bg-gray-900/90 px-4 py-1.5 rounded-full border border-gray-700 shadow-lg backdrop-blur-md">
+<span class="w-2 h-2 bg-blue-500 rounded-full mr-2 shadow-[0_0_5px_rgba(59,130,246,0.8)]"></span>
+<p>Cloud &amp; Infra</p>
+</div>
+<!-- Purple: Policy -->
+<div class="flex items-center text-gray-300 text-[11px] bg-gray-900/90 px-4 py-1.5 rounded-full border border-gray-700 shadow-lg backdrop-blur-md">
+<span class="w-2 h-2 bg-purple-500 rounded-full mr-2 shadow-[0_0_5px_rgba(168,85,247,0.8)]"></span>
+<p>Policy Engine</p>
+</div>
+<!-- Pink: SaaS -->
+<div class="flex items-center text-gray-300 text-[11px] bg-gray-900/90 px-4 py-1.5 rounded-full border border-gray-700 shadow-lg backdrop-blur-md">
+<span class="w-2 h-2 bg-pink-500 rounded-full mr-2 shadow-[0_0_5px_rgba(236,72,153,0.8)]"></span>
+<p>SaaS Apps</p>
+</div>
+<!-- Emerald: Database -->
+<div class="flex items-center text-gray-300 text-[11px] bg-gray-900/90 px-4 py-1.5 rounded-full border border-gray-700 shadow-lg backdrop-blur-md">
+<span class="w-2 h-2 bg-emerald-500 rounded-full mr-2 shadow-[0_0_5px_rgba(16,185,129,0.8)]"></span>
+<p>Database</p>
+</div>
+</div>
+</div>
+</div>
+<script>
+        // --- 1. Background Grid Drawing ---
+        const bgCanvas = document.getElementById('bgCanvas');
+        const bgCtx = bgCanvas.getContext('2d');
+        const CANVAS_WIDTH = 1280;
+        const CANVAS_HEIGHT = 720;
+        
+        function drawGrid() {
+            bgCtx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            // Grid Lines
+            bgCtx.strokeStyle = 'rgba(30, 41, 59, 0.3)';
+            bgCtx.lineWidth = 1;
+            const step = 40;
+            
+            for(let x = 0; x <= CANVAS_WIDTH; x += step) {
+                bgCtx.beginPath();
+                bgCtx.moveTo(x, 0);
+                bgCtx.lineTo(x, CANVAS_HEIGHT);
+                bgCtx.stroke();
+            }
+            for(let y = 0; y <= CANVAS_HEIGHT; y += step) {
+                bgCtx.beginPath();
+                bgCtx.moveTo(0, y);
+                bgCtx.lineTo(CANVAS_WIDTH, y);
+                bgCtx.stroke();
+            }
+            
+            // Decorative Circles
+            bgCtx.strokeStyle = 'rgba(30, 41, 59, 0.5)';
+            bgCtx.beginPath();
+            bgCtx.arc(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 250, 0, Math.PI * 2);
+            bgCtx.stroke();
+            
+            bgCtx.strokeStyle = 'rgba(30, 41, 59, 0.3)';
+            bgCtx.beginPath();
+            bgCtx.arc(CANVAS_WIDTH / 2, CANVAS_HEIGHT / 2, 350, 0, Math.PI * 2);
+            bgCtx.stroke();
+        }
+        drawGrid();
+
+        // --- 2. Fixed Coordinates (PPT-style) ---
+        const linesCanvas = document.getElementById('linesCanvas');
+        const ctx = linesCanvas.getContext('2d');
+
+        // 고정 좌표 사용 (1280x720 기준)
+        const HUB = { x: 640, y: 360 };
+
+        const SATELLITES = {
+            tl: { x: 300, y: 180, color: '#60a5fa' },
+            tr: { x: 980, y: 180, color: '#f472b6' },
+            bl: { x: 300, y: 540, color: '#818cf8' },
+            br: { x: 980, y: 540, color: '#34d399' }
+        };
+
+        const targets = Object.values(SATELLITES);
+
+
+        // --- 3. Animation Loop ---
+        let offset = 0;
+
+        function animateLines() {
+            ctx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+            
+            targets.forEach(target => {
+                // Static Line (Base)
+                ctx.beginPath();
+                ctx.moveTo(HUB.x, HUB.y);
+                ctx.lineTo(target.x, target.y);
+                ctx.strokeStyle = 'rgba(30, 41, 59, 0.6)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Pulse Line (Dashed)
+                ctx.beginPath();
+                ctx.moveTo(HUB.x, HUB.y);
+                ctx.lineTo(target.x, target.y);
+                ctx.setLineDash([20, 30]); 
+                ctx.lineDashOffset = -offset;
+                ctx.strokeStyle = 'rgba(34, 211, 238, 0.4)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+                ctx.setLineDash([]); 
+
+                // Moving Packets
+                const packetCount = 3; 
+                for(let i = 0; i < packetCount; i++) {
+                    const speed = 0.003;
+                    const progress = (offset * speed + i/packetCount) % 1;
+                    
+                    const px = HUB.x + (target.x - HUB.x) * progress;
+                    const py = HUB.y + (target.y - HUB.y) * progress;
+                    
+                    ctx.fillStyle = target.color;
+                    ctx.beginPath();
+                    ctx.arc(px, py, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Glow effect for packet
+                    ctx.shadowColor = target.color;
+                    ctx.shadowBlur = 8;
+                    ctx.fill();
+                    ctx.shadowBlur = 0; 
+                }
+            });
+
+            offset += 1.0;
+            requestAnimationFrame(animateLines);
+        }
+
+        animateLines();
+
+    </script>
+
+</body></html>

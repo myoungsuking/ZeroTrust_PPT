@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=1280, height=720, initial-scale=1.0" name="viewport"/>
+<title>Infrastructure Security</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&amp;family=Rajdhani:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+<style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #020617; /* Very Dark Blue */
+            font-family: 'Noto Sans KR', sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Neon & Glow Effects */
+        .neon-text-cyan {
+            text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+        }
+
+        .glass-panel {
+            background-color: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .card-item {
+            background-color: rgba(15, 23, 42, 0.6);
+            border-left: 3px solid #334155;
+            transition: all 0.3s ease;
+        }
+
+        .card-item:hover {
+            background-color: rgba(15, 23, 42, 0.9);
+            border-left-color: #22d3ee;
+            transform: translateX(5px);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.1);
+        }
+
+        .icon-box {
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(30, 41, 59, 0.8);
+            border-radius: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .card-item:hover .icon-box {
+            border-color: #22d3ee;
+            color: #22d3ee;
+        }
+
+        /* Diagram Styles */
+        .layer-box {
+            position: relative;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .layer-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            box-shadow: inset 0 0 20px rgba(34, 211, 238, 0.05);
+            pointer-events: none;
+        }
+        
+        /* Specific Layer Colors */
+        .layer-edge { border-color: #3b82f6; box-shadow: 0 0 10px rgba(59, 130, 246, 0.2); }
+        .layer-network { border-color: #8b5cf6; box-shadow: 0 0 10px rgba(139, 92, 246, 0.2); }
+        .layer-access { border-color: #22d3ee; box-shadow: 0 0 15px rgba(34, 211, 238, 0.3); }
+        .layer-infra { border-color: #10b981; box-shadow: 0 0 10px rgba(16, 185, 129, 0.2); }
+
+        .connection-line {
+            position: absolute;
+            width: 2px;
+            background-color: rgba(148, 163, 184, 0.3);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+
+        .data-flow {
+            position: absolute;
+            width: 4px;
+            height: 10px;
+            background-color: #22d3ee;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 2px;
+            opacity: 0;
+            animation: flowDown 2s infinite;
+        }
+
+        @keyframes flowDown {
+            0% { top: 0; opacity: 0; }
+            20% { opacity: 1; }
+            80% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        /* Tech Decoration */
+        .tech-bracket {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            border: 2px solid rgba(34, 211, 238, 0.5);
+        }
+        .tb-tl { top: -1px; left: -1px; border-width: 2px 0 0 2px; }
+        .tb-tr { top: -1px; right: -1px; border-width: 2px 2px 0 0; }
+        .tb-bl { bottom: -1px; left: -1px; border-width: 0 0 2px 2px; }
+        .tb-br { bottom: -1px; right: -1px; border-width: 0 2px 2px 0; }
+
+        /* Canvas */
+        #bgCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+    </style>
+</head>
+<body>
+<div class="relative w-[1280px] h-[720px] flex flex-col p-12 overflow-hidden">
+<!-- Background Canvas -->
+<canvas height="720" id="bgCanvas" width="1280"></canvas>
+<!-- Header -->
+<div class="z-10 flex flex-col mb-8">
+<h2 class="font-tech text-cyan-400 tracking-[0.2em] text-lg font-bold uppercase mb-1">
+                Infrastructure Security
+            </h2>
+<h1 class="text-4xl font-bold text-white mb-2">
+                Infrastructure 영역
+            </h1>
+<div class="h-1 w-20 bg-cyan-500 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.6)]"></div>
+</div>
+<!-- Main Layout -->
+<div class="z-10 flex-1 flex gap-12 mb-8">
+<!-- Left Column: Content -->
+<div class="flex-1 flex flex-col justify-between">
+<div>
+<!-- Targets Section -->
+<div class="mb-8">
+<h3 class="text-gray-400 font-tech uppercase tracking-wider text-sm mb-3 flex items-center">
+<span class="w-1 h-4 bg-gray-600 mr-2"></span>
+                            Protection Targets
+                        </h3>
+<div class="glass-panel rounded-xl p-4 flex flex-wrap gap-4 items-center">
+<div class="flex items-center space-x-2 text-gray-300">
+<i class="fa-brands fa-aws text-[#FF9900] text-xl"></i>
+<span class="font-bold text-sm">AWS</span>
+</div>
+<div class="w-px h-4 bg-gray-600"></div>
+<div class="flex items-center space-x-2 text-gray-300">
+<i class="fa-brands fa-microsoft text-[#00A4EF] text-xl"></i>
+<span class="font-bold text-sm">Azure</span>
+</div>
+<div class="w-px h-4 bg-gray-600"></div>
+<div class="flex items-center space-x-2 text-gray-300">
+<i class="fa-brands fa-google text-[#4285F4] text-xl"></i>
+<span class="font-bold text-sm">GCP</span>
+</div>
+<div class="w-px h-4 bg-gray-600"></div>
+<div class="flex items-center space-x-2 text-gray-300">
+<i class="fa-solid fa-server text-gray-400 text-xl"></i>
+<span class="font-bold text-sm">On-Prem</span>
+</div>
+<div class="w-px h-4 bg-gray-600"></div>
+<div class="flex items-center space-x-2 text-gray-300">
+<i class="fa-solid fa-dharmachakra text-[#326CE5] text-xl"></i>
+<span class="font-bold text-sm">K8s</span>
+</div>
+</div>
+</div>
+<!-- Solutions List -->
+<div>
+<h3 class="text-gray-400 font-tech uppercase tracking-wider text-sm mb-3 flex items-center">
+<span class="w-1 h-4 bg-cyan-600 mr-2"></span>
+                            Applied Solutions
+                        </h3>
+<div class="space-y-4">
+<!-- Solution 1 -->
+<div class="card-item p-4 rounded-r-lg flex items-start">
+<div class="icon-box mr-4 flex-shrink-0">
+<i class="fa-solid fa-id-card-clip text-gray-400 text-lg"></i>
+</div>
+<div>
+<h4 class="text-cyan-300 font-bold text-lg font-tech mb-1">QueryPie SAC</h4>
+<p class="text-gray-400 text-sm">서버 접근 제어 및 세션 기반 인증 관리</p>
+</div>
+</div>
+<!-- Solution 2 -->
+<div class="card-item p-4 rounded-r-lg flex items-start">
+<div class="icon-box mr-4 flex-shrink-0">
+<i class="fa-solid fa-globe text-gray-400 text-lg"></i>
+</div>
+<div>
+<h4 class="text-blue-300 font-bold text-lg font-tech mb-1">CDN Security</h4>
+<p class="text-gray-400 text-sm">WAF · API Firewall · Anti-DDoS</p>
+</div>
+</div>
+<!-- Solution 3 -->
+<div class="card-item p-4 rounded-r-lg flex items-start">
+<div class="icon-box mr-4 flex-shrink-0">
+<i class="fa-solid fa-shield-virus text-gray-400 text-lg"></i>
+</div>
+<div>
+<h4 class="text-purple-300 font-bold text-lg font-tech mb-1">Threat Defense</h4>
+<p class="text-gray-400 text-sm">IPS / IDS / Firewall 위협 탐지 및 차단</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Key Point Footer -->
+<div class="relative bg-cyan-900 bg-opacity-30 border-l-4 border-cyan-500 p-5 rounded-r-lg mt-4">
+<div class="absolute -top-3 left-4 bg-gray-900 px-2 text-cyan-400 text-xs font-bold uppercase tracking-widest border border-cyan-500/30 rounded">Key Point</div>
+<p class="text-gray-200">
+                        인프라는 <span class="text-gray-500 line-through">"접속 가능"</span>이 아니라<br/>
+<span class="text-cyan-300 font-bold text-xl">"허용된 사람만, 허용된 방식"</span>으로 접근합니다.
+                    </p>
+</div>
+</div>
+<!-- Right Column: Illustration -->
+<div class="flex-1 relative flex flex-col items-center py-4">
+<!-- Vertical Line -->
+<div class="absolute top-0 bottom-0 w-0.5 bg-gray-800 left-1/2 transform -translate-x-1/2 z-0"></div>
+<!-- Layer 1: Edge -->
+<div class="relative z-10 w-full mb-6">
+<div class="layer-box layer-edge rounded-lg p-3 mx-auto w-3/4 flex items-center justify-between">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-blue-900/50 rounded flex items-center justify-center mr-3 border border-blue-500/30">
+<i class="fa-solid fa-earth-americas text-blue-400"></i>
+</div>
+<div>
+<h4 class="text-white font-bold font-tech">EDGE SECURITY</h4>
+<p class="text-xs text-blue-300">CDN · WAF · DDoS</p>
+</div>
+</div>
+<i class="fa-solid fa-shield-halved text-blue-500/30 text-3xl"></i>
+</div>
+<!-- Connection Animation -->
+<div class="absolute h-8 w-full top-full left-0 overflow-hidden">
+<div class="data-flow" style="animation-delay: 0s;"></div>
+</div>
+</div>
+<!-- Layer 2: Network -->
+<div class="relative z-10 w-full mb-6 mt-2">
+<div class="layer-box layer-network rounded-lg p-3 mx-auto w-3/4 flex items-center justify-between">
+<div class="flex items-center">
+<div class="w-10 h-10 bg-purple-900/50 rounded flex items-center justify-center mr-3 border border-purple-500/30">
+<i class="fa-solid fa-network-wired text-purple-400"></i>
+</div>
+<div>
+<h4 class="text-white font-bold font-tech">NETWORK SECURITY</h4>
+<p class="text-xs text-purple-300">Firewall · IPS/IDS</p>
+</div>
+</div>
+<i class="fa-solid fa-filter text-purple-500/30 text-3xl"></i>
+</div>
+<!-- Connection Animation -->
+<div class="absolute h-8 w-full top-full left-0 overflow-hidden">
+<div class="data-flow" style="animation-delay: 0.5s;"></div>
+</div>
+</div>
+<!-- Layer 3: Access Control (Highlight) -->
+<div class="relative z-10 w-full mb-8 mt-2">
+<div class="layer-box layer-access rounded-lg p-4 mx-auto w-5/6 bg-cyan-900/20 flex items-center justify-between border-2 border-cyan-500/50">
+<div class="tech-bracket tb-tl"></div>
+<div class="tech-bracket tb-tr"></div>
+<div class="tech-bracket tb-bl"></div>
+<div class="tech-bracket tb-br"></div>
+<div class="flex items-center">
+<div class="w-12 h-12 bg-cyan-500 rounded flex items-center justify-center mr-4 shadow-lg shadow-cyan-500/20">
+<i class="fa-solid fa-key text-white text-xl"></i>
+</div>
+<div>
+<h4 class="text-cyan-300 font-bold text-lg font-tech">ACCESS CONTROL</h4>
+<p class="text-xs text-white">QueryPie SAC (Gateway)</p>
+</div>
+</div>
+<div class="flex flex-col items-end text-xs text-cyan-200/70 font-tech">
+<span><i class="fa-solid fa-check mr-1"></i>MFA</span>
+<span><i class="fa-solid fa-check mr-1"></i>Audit</span>
+</div>
+</div>
+<!-- Connection Animation -->
+<div class="absolute h-10 w-full top-full left-0 overflow-hidden">
+<div class="data-flow" style="animation-delay: 1s;"></div>
+</div>
+</div>
+<!-- Layer 4: Infrastructure Resources -->
+<div class="relative z-10 w-full mt-2">
+<div class="layer-box layer-infra rounded-xl p-5 mx-auto w-full bg-gray-900/80 grid grid-cols-2 gap-3">
+<!-- Cloud Resources -->
+<div class="col-span-2 text-center border-b border-gray-700 pb-2 mb-1">
+<span class="text-xs text-gray-500 font-tech uppercase tracking-widest">Secured Zone</span>
+</div>
+<div class="bg-gray-800/50 rounded p-2 flex items-center space-x-3 border border-gray-700">
+<i class="fa-solid fa-server text-indigo-400"></i>
+<div>
+<p class="text-xs text-gray-400 font-bold">Linux/Windows</p>
+<p class="text-[10px] text-gray-600">Servers</p>
+</div>
+</div>
+<div class="bg-gray-800/50 rounded p-2 flex items-center space-x-3 border border-gray-700">
+<i class="fa-solid fa-cubes text-blue-400"></i>
+<div>
+<p class="text-xs text-gray-400 font-bold">Kubernetes</p>
+<p class="text-[10px] text-gray-600">Clusters</p>
+</div>
+</div>
+<div class="bg-gray-800/50 rounded p-2 flex items-center space-x-3 border border-gray-700">
+<i class="fa-solid fa-database text-emerald-400"></i>
+<div>
+<p class="text-xs text-gray-400 font-bold">Databases</p>
+<p class="text-[10px] text-gray-600">RDS / On-Prem</p>
+</div>
+</div>
+<div class="bg-gray-800/50 rounded p-2 flex items-center space-x-3 border border-gray-700">
+<i class="fa-solid fa-network-wired text-orange-400"></i>
+<div>
+<p class="text-xs text-gray-400 font-bold">VPC Network</p>
+<p class="text-[10px] text-gray-600">Private Subnets</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<!-- Top Right Logo -->
+<div class="absolute top-12 right-12 z-50">
+<img alt="HIPERLAB" class="h-12 object-contain opacity-90" src="../assets/image-Photoroom.png"/>
+</div>
+<script>
+        // Tech Background Animation (Grid + Particles)
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const particles = [];
+        const particleCount = 30;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = Math.random() * 0.2 - 0.1;
+                this.speedY = Math.random() * 0.2 - 0.1;
+                this.opacity = Math.random() * 0.5;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(34, 211, 238, ${this.opacity})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw Grid
+            ctx.strokeStyle = 'rgba(30, 41, 59, 0.2)';
+            ctx.lineWidth = 1;
+            const step = 40;
+            
+            for(let x = 0; x <= canvas.width; x += step) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for(let y = 0; y <= canvas.height; y += step) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Draw Particles
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

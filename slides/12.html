@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=1280, height=720, initial-scale=1.0" name="viewport"/>
+<title>Zero Trust Strengths</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&amp;family=Rajdhani:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+<style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #020617; /* Very Dark Blue */
+            font-family: 'Noto Sans KR', sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Custom Glow Effects */
+        .neon-text {
+            text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+        }
+
+        .neon-border {
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.1), inset 0 0 10px rgba(34, 211, 238, 0.05);
+        }
+        
+        .card-container {
+            background-color: rgba(15, 23, 42, 0.6);
+            backdrop-filter: blur(8px);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .card-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0 25px rgba(34, 211, 238, 0.2);
+            border-color: rgba(34, 211, 238, 0.8);
+            background-color: rgba(15, 23, 42, 0.8);
+        }
+
+        .check-icon-circle {
+            background-color: rgba(6, 182, 212, 0.1);
+            border: 2px solid #22d3ee;
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.3);
+        }
+
+        .message-box {
+            background-color: rgba(30, 41, 59, 0.6);
+            border-left: 4px solid #22d3ee;
+        }
+
+        /* Canvas Background */
+        #bgCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            opacity: 0.3;
+        }
+
+        /* Decorative Corners */
+        .corner-accent {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-color: #22d3ee;
+            border-style: solid;
+            opacity: 0.6;
+        }
+        .corner-tl { top: 0; left: 0; border-width: 2px 0 0 2px; }
+        .corner-tr { top: 0; right: 0; border-width: 2px 2px 0 0; }
+        .corner-bl { bottom: 0; left: 0; border-width: 0 0 2px 2px; }
+        .corner-br { bottom: 0; right: 0; border-width: 0 2px 2px 0; }
+
+        /* Maturity Model Stepper */
+        .step-circle {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            position: relative;
+        }
+        .step-line {
+            height: 2px;
+            flex-grow: 1;
+            margin: 0 10px;
+        }
+        .step-active {
+            background-color: #22d3ee;
+            color: #020617;
+            box-shadow: 0 0 15px #22d3ee;
+        }
+        .step-inactive {
+            background-color: rgba(148, 163, 184, 0.2);
+            color: #94a3b8;
+            border: 1px solid #94a3b8;
+        }
+        .step-target {
+            background-color: transparent;
+            border: 2px dashed #22d3ee;
+            color: #22d3ee;
+        }
+    </style>
+</head>
+<body>
+<div class="relative w-[1280px] h-[720px] flex flex-col p-12 overflow-hidden">
+<!-- Background Canvas -->
+<canvas height="720" id="bgCanvas" width="1280"></canvas>
+<!-- Logo (Moved to Top Right) -->
+<div class="absolute top-10 right-12 z-50">
+<img alt="HIPERLAB Logo" class="h-12 object-contain opacity-90 drop-shadow-[0_0_5px_rgba(34,211,238,0.3)]" src="../assets/image-Photoroom.png"/>
+</div>
+<!-- Header -->
+<div class="z-10 flex flex-col mb-6 relative">
+<h2 class="font-tech text-cyan-400 tracking-[0.2em] text-lg font-bold uppercase mb-1">
+                Zero Trust Strengths
+            </h2>
+<h1 class="text-4xl font-bold text-white mb-2">
+                우리 회사 Zero Trust의 강점
+            </h1>
+<div class="h-1 w-20 bg-cyan-500 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.6)]"></div>
+<!-- Tech decoration lines (Adjusted to not overlap with logo) -->
+<div class="absolute right-20 top-6 w-1/4 h-[1px] bg-cyan-900 opacity-30"></div>
+</div>
+<!-- Main Content: 3 Cards -->
+<div class="z-10 flex-1 flex flex-row gap-6 items-stretch mb-4">
+<!-- Card 1: E2E -->
+<div class="flex-1 card-container neon-border rounded-xl p-6 flex flex-col items-center text-center relative group">
+<div class="corner-accent corner-tl"></div>
+<div class="corner-accent corner-tr"></div>
+<div class="corner-accent corner-bl"></div>
+<div class="corner-accent corner-br"></div>
+<div class="w-16 h-16 rounded-full check-icon-circle flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+<i class="fa-solid fa-layer-group text-3xl text-cyan-400"></i>
+</div>
+<h3 class="font-tech text-2xl font-bold text-white mb-1 tracking-wide">E2E CONTROL</h3>
+<h4 class="text-lg font-bold text-cyan-400 mb-3">인프라 → 데이터 통제</h4>
+<div class="w-full h-[1px] bg-gray-700 mb-3"></div>
+<div class="text-gray-300 leading-relaxed text-sm">
+<p class="mb-2 flex items-center justify-center"><i class="fa-solid fa-server text-cyan-500 mr-2"></i>Infrastructure</p>
+<p class="mb-2 flex items-center justify-center"><i class="fa-solid fa-cloud text-cyan-500 mr-2"></i>Cloud &amp; SaaS</p>
+<p class="mb-2 flex items-center justify-center"><i class="fa-solid fa-database text-cyan-500 mr-2"></i>Data Access</p>
+<p class="text-xs text-gray-400 mt-2 bg-slate-800/50 py-1 px-3 rounded-full inline-block border border-slate-700">End-to-End Visibility</p>
+</div>
+</div>
+<!-- Card 2: AI -->
+<div class="flex-1 card-container neon-border rounded-xl p-6 flex flex-col items-center text-center relative group">
+<div class="corner-accent corner-tl"></div>
+<div class="corner-accent corner-tr"></div>
+<div class="corner-accent corner-bl"></div>
+<div class="corner-accent corner-br"></div>
+<div class="w-16 h-16 rounded-full check-icon-circle flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+<i class="fa-solid fa-microchip text-3xl text-cyan-400"></i>
+</div>
+<h3 class="font-tech text-2xl font-bold text-white mb-1 tracking-wide">AI DRIVEN</h3>
+<h4 class="text-lg font-bold text-cyan-400 mb-3">지능형 제어 &amp; 감사</h4>
+<div class="w-full h-[1px] bg-gray-700 mb-3"></div>
+<div class="text-gray-300 leading-relaxed text-sm">
+<p class="mb-2 flex items-center justify-center"><i class="fa-solid fa-wand-magic-sparkles text-cyan-500 mr-2"></i>Smart Policy Rec.</p>
+<p class="mb-2 flex items-center justify-center"><i class="fa-solid fa-triangle-exclamation text-cyan-500 mr-2"></i>Anomaly Detection</p>
+<p class="mb-2 flex items-center justify-center"><i class="fa-solid fa-file-contract text-cyan-500 mr-2"></i>Auto Auditing</p>
+<p class="text-xs text-gray-400 mt-2 bg-slate-800/50 py-1 px-3 rounded-full inline-block border border-slate-700">Powered by QueryPie AI</p>
+</div>
+</div>
+<!-- Card 3: 360 Coverage -->
+<div class="flex-1 card-container neon-border rounded-xl p-6 flex flex-col items-center text-center relative group">
+<div class="corner-accent corner-tl"></div>
+<div class="corner-accent corner-tr"></div>
+<div class="corner-accent corner-bl"></div>
+<div class="corner-accent corner-br"></div>
+<div class="w-16 h-16 rounded-full check-icon-circle flex items-center justify-center mb-4 group-hover:scale-110 transition-transform duration-300">
+<i class="fa-solid fa-globe text-3xl text-cyan-400"></i>
+</div>
+<h3 class="font-tech text-2xl font-bold text-white mb-1 tracking-wide">360° COVERAGE</h3>
+<h4 class="text-lg font-bold text-cyan-400 mb-3">빈틈없는 통합 대응</h4>
+<div class="w-full h-[1px] bg-gray-700 mb-3"></div>
+<div class="text-gray-300 leading-relaxed text-sm">
+<p class="mb-2 flex items-center justify-center"><i class="fa-solid fa-building text-cyan-500 mr-2"></i>On-Premise</p>
+<p class="mb-2 flex items-center justify-center"><i class="fa-brands fa-aws text-cyan-500 mr-2"></i>Multi-Cloud</p>
+<p class="mb-2 flex items-center justify-center"><i class="fa-brands fa-slack text-cyan-500 mr-2"></i>SaaS Apps</p>
+<p class="text-xs text-gray-400 mt-2 bg-slate-800/50 py-1 px-3 rounded-full inline-block border border-slate-700">Seamless Integration</p>
+</div>
+</div>
+</div>
+<!-- Footer: Maturity Model -->
+<div class="z-10 mt-auto mb-2">
+<div class="message-box p-4 rounded-r-xl flex items-center shadow-lg relative overflow-hidden h-24">
+<div class="absolute inset-0 bg-cyan-900 opacity-10"></div>
+<div class="flex-shrink-0 mr-6 w-36 border-r border-gray-600 pr-4">
+<p class="text-gray-400 text-[10px] mb-1 uppercase tracking-wider font-tech">Security Maturity</p>
+<h3 class="text-white font-bold text-lg leading-tight">Maturity<br/>Model</h3>
+</div>
+<div class="flex-1 flex flex-col justify-center">
+<!-- Stepper UI -->
+<div class="flex items-center mb-2 px-4">
+<!-- Step 1 -->
+<div class="flex flex-col items-center">
+<div class="step-circle step-inactive mb-1 w-6 h-6 text-xs">1</div>
+<span class="text-[10px] text-gray-500 uppercase font-tech">Initial</span>
+</div>
+<div class="step-line bg-gray-700"></div>
+<!-- Step 2 -->
+<div class="flex flex-col items-center relative">
+<div class="step-circle step-active mb-1 z-10 w-6 h-6 text-xs">2</div>
+<div class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full animate-ping"></div>
+<span class="text-[10px] text-cyan-400 font-bold uppercase font-tech">Advanced</span>
+</div>
+<div class="step-line bg-gray-700 border-t border-dashed border-gray-600 bg-transparent h-0"></div>
+<!-- Step 3 -->
+<div class="flex flex-col items-center">
+<div class="step-circle step-target mb-1 w-6 h-6 text-xs">3</div>
+<span class="text-[10px] text-gray-400 uppercase font-tech">Optimal</span>
+</div>
+</div>
+<!-- Description -->
+<div class="flex items-center justify-center bg-slate-900/50 py-1 rounded-lg border border-slate-700/50">
+<i class="fa-solid fa-arrow-right text-cyan-500 mr-2 text-xs"></i>
+<p class="text-white text-xs">
+                        우리는 현재 <span class="text-cyan-400 font-bold">Advanced</span> 단계, 
+                        <span class="text-gray-300">Data 중심</span> <span class="text-cyan-400 font-bold border-b border-dashed border-cyan-500">Optimal</span> 모델로 이동 중
+                    </p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+        // Tech Background Animation
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const nodes = [];
+        const nodeCount = 40; // Reduced slightly for cleaner look
+        const connectionDistance = 150;
+
+        class Node {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.vx = (Math.random() - 0.5) * 0.4;
+                this.vy = (Math.random() - 0.5) * 0.4;
+                this.size = Math.random() * 2 + 0.5;
+            }
+
+            update() {
+                this.x += this.vx;
+                this.y += this.vy;
+
+                if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+                if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+            }
+
+            draw() {
+                ctx.fillStyle = '#22d3ee';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < nodeCount; i++) {
+            nodes.push(new Node());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw Grid
+            ctx.strokeStyle = 'rgba(30, 41, 59, 0.2)';
+            ctx.lineWidth = 1;
+            const gridSize = 60;
+            
+            for(let x = 0; x <= canvas.width; x += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            for(let y = 0; y <= canvas.height; y += gridSize) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Draw Nodes and Connections
+            nodes.forEach((node, index) => {
+                node.update();
+                node.draw();
+
+                for (let j = index + 1; j < nodes.length; j++) {
+                    const other = nodes[j];
+                    const dx = node.x - other.x;
+                    const dy = node.y - other.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist < connectionDistance) {
+                        ctx.strokeStyle = `rgba(34, 211, 238, ${0.1 * (1 - dist / connectionDistance)})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(node.x, node.y);
+                        ctx.lineTo(other.x, other.y);
+                        ctx.stroke();
+                    }
+                }
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

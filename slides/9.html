@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Identity &amp; Application Security</title>
+<!-- Fonts -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700;900&amp;family=Rajdhani:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<!-- Icons -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet"/>
+<!-- Tailwind CSS -->
+<link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet"/>
+<style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #020617; /* Very Dark Blue */
+            font-family: 'Noto Sans KR', sans-serif;
+            overflow: hidden;
+            color: white;
+        }
+
+        .font-tech {
+            font-family: 'Rajdhani', sans-serif;
+        }
+
+        /* Neon & Glow Effects */
+        .neon-text-cyan {
+            text-shadow: 0 0 10px rgba(34, 211, 238, 0.5);
+        }
+
+        .glass-panel {
+            background-color: rgba(30, 41, 59, 0.4);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(51, 65, 85, 0.5);
+        }
+
+        .card-item {
+            background-color: rgba(15, 23, 42, 0.6);
+            border-left: 3px solid #334155;
+            transition: all 0.3s ease;
+        }
+
+        .card-item:hover {
+            background-color: rgba(15, 23, 42, 0.9);
+            border-left-color: #8b5cf6; /* Purple for Identity */
+            transform: translateX(5px);
+            box-shadow: 0 0 15px rgba(139, 92, 246, 0.1);
+        }
+
+        .icon-box {
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: rgba(30, 41, 59, 0.8);
+            border-radius: 8px;
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .card-item:hover .icon-box {
+            border-color: #8b5cf6;
+            color: #8b5cf6;
+        }
+
+        /* Diagram Styles */
+        .layer-box {
+            position: relative;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(34, 211, 238, 0.3);
+            box-shadow: 0 0 15px rgba(34, 211, 238, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .layer-box::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            border-radius: inherit;
+            box-shadow: inset 0 0 20px rgba(34, 211, 238, 0.05);
+            pointer-events: none;
+        }
+        
+        /* Specific Layer Colors */
+        .layer-idp { border-color: #3b82f6; box-shadow: 0 0 15px rgba(59, 130, 246, 0.2); }
+        .layer-saas { border-color: #10b981; box-shadow: 0 0 15px rgba(16, 185, 129, 0.2); }
+
+        .connection-line {
+            position: absolute;
+            width: 2px;
+            background-color: rgba(148, 163, 184, 0.3);
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 0;
+        }
+
+        /* Canvas */
+        #bgCanvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* Authentication Flow Animation */
+        .auth-flow-line {
+            position: absolute;
+            left: 50%;
+            top: 100%;
+            width: 4px;
+            height: 60px;
+            background: rgba(59, 130, 246, 0.2);
+            transform: translateX(-50%);
+            overflow: hidden;
+        }
+
+        .auth-flow-packet {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 20%;
+            background: #3b82f6;
+            box-shadow: 0 0 10px #3b82f6;
+            animation: flowDown 1.5s infinite linear;
+        }
+
+        @keyframes flowDown {
+            0% { top: -20%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+<div class="relative w-[1280px] h-[720px] flex flex-col p-8 pb-4 overflow-hidden" style="width: 1280px; height: 720px;">
+<!-- Background Canvas -->
+<canvas height="720" id="bgCanvas" width="1280"></canvas>
+<!-- Logo (Top Right) -->
+<div class="absolute top-8 right-8 z-20">
+<img alt="HIPERLAB Logo" class="h-12 object-contain opacity-80" src="../assets/image-Photoroom.png"/>
+</div>
+<!-- Header -->
+<div class="z-10 flex flex-col mb-8">
+<h2 class="font-tech text-purple-400 tracking-[0.2em] text-lg font-bold uppercase mb-1">
+                Identity is the Core
+            </h2>
+<h1 class="text-4xl font-bold text-white mb-2">
+                Identity &amp; Application 영역
+            </h1>
+<div class="h-1 w-20 bg-purple-500 rounded-full shadow-[0_0_10px_rgba(168,85,247,0.6)]"></div>
+</div>
+<!-- Main Layout -->
+<div class="z-10 flex-1 flex gap-12 mb-8">
+<!-- Left Column: Content -->
+<div class="flex-1 flex flex-col justify-center">
+<div class="space-y-8">
+<!-- Solution 1: Okta -->
+<div class="card-item p-5 rounded-r-lg flex items-start">
+<div class="icon-box mr-5 flex-shrink-0">
+<i class="fa-solid fa-circle-user text-blue-400 text-2xl"></i>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-2">
+<h4 class="text-white font-bold text-xl font-tech">Okta IdP</h4>
+<span class="text-xs bg-blue-900/50 text-blue-300 px-3 py-1 rounded border border-blue-500/30 uppercase tracking-wider font-bold">Authentication</span>
+</div>
+<p class="text-gray-400 mb-3 text-sm">중앙화된 사용자 인증 및 접근 권한 관리</p>
+<div class="flex gap-2">
+<p class="text-xs text-blue-200 bg-blue-900/40 border border-blue-500/20 px-3 py-1.5 rounded"><i class="fa-solid fa-key mr-1"></i>SSO</p>
+<p class="text-xs text-blue-200 bg-blue-900/40 border border-blue-500/20 px-3 py-1.5 rounded"><i class="fa-solid fa-shield-halved mr-1"></i>MFA</p>
+<p class="text-xs text-blue-200 bg-blue-900/40 border border-blue-500/20 px-3 py-1.5 rounded"><i class="fa-solid fa-filter mr-1"></i>Conditional Access</p>
+</div>
+</div>
+</div>
+<!-- Solution 2: SaaS Protection -->
+<div class="card-item p-5 rounded-r-lg flex items-start">
+<div class="icon-box mr-5 flex-shrink-0">
+<i class="fa-solid fa-shield-halved text-emerald-400 text-2xl"></i>
+</div>
+<div class="flex-1">
+<div class="flex justify-between items-center mb-2">
+<h4 class="text-emerald-300 font-bold text-xl font-tech">SaaS Protection</h4>
+<span class="text-xs bg-emerald-900/50 text-emerald-300 px-3 py-1 rounded border border-emerald-500/30 uppercase tracking-wider font-bold">Application</span>
+</div>
+<p class="text-gray-400 mb-3 text-sm">업무용 SaaS 애플리케이션 접근 통제 및 보호</p>
+<div class="flex items-center gap-6 text-gray-300 bg-gray-900/40 p-3 rounded border border-gray-700/50">
+<i class="fa-brands fa-slack text-2xl hover:text-white transition-colors"></i>
+<i class="fa-brands fa-jira text-2xl text-blue-400 hover:text-blue-300 transition-colors"></i>
+<i class="fa-brands fa-github text-2xl hover:text-white transition-colors"></i>
+<span class="text-xs text-gray-500 ml-auto border-l border-gray-600 pl-4 font-tech tracking-wide">API · Message Control</span>
+</div>
+</div>
+</div>
+<!-- Key Message (Replaced AI Role) -->
+<div class="relative bg-gradient-to-r from-blue-900/40 to-transparent border-l-4 border-blue-500 p-4 rounded-r-lg mt-4">
+<div class="absolute -top-3 left-4 bg-gray-900 px-2 text-blue-400 text-xs font-bold uppercase tracking-widest border border-blue-500/30 rounded">Core Value</div>
+<p class="text-gray-200 text-sm leading-relaxed">
+<span class="text-gray-400">모든 애플리케이션 접근은</span><br/>
+<strong class="text-blue-300 text-lg">"단일 Identity(Okta)를 통해 검증되고 연결됩니다."</strong>
+</p>
+</div>
+</div>
+</div>
+<!-- Right Column: Illustration -->
+<div class="flex-1 relative flex flex-col items-center justify-center py-4 h-full">
+<!-- Vertical Dashed Line for Context -->
+<div class="absolute top-20 bottom-20 w-px border-l border-dashed border-gray-700 left-1/2 transform -translate-x-1/2 z-0"></div>
+<!-- Layer 1: Identity Source (Okta) -->
+<div class="relative z-10 w-full mb-16">
+<div class="layer-box layer-idp rounded-xl p-6 mx-auto w-4/5 bg-blue-900/10 border-2 border-blue-500/60 relative shadow-[0_0_30px_rgba(59,130,246,0.15)]">
+<div class="flex items-center justify-between">
+<div class="flex items-center">
+<div class="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mr-5 border-4 border-blue-800 shadow-lg shadow-blue-500/40 relative z-10">
+<span class="font-bold text-white text-lg font-tech tracking-wider">Okta</span>
+<!-- Pulse Effect -->
+<div class="absolute inset-0 rounded-full bg-blue-400 opacity-20 animate-ping"></div>
+</div>
+<div>
+<h4 class="text-white font-bold font-tech text-xl mb-1">IDENTITY PROVIDER</h4>
+<p class="text-sm text-blue-300">Authentication Authority</p>
+</div>
+</div>
+<div class="flex flex-col items-end space-y-2">
+<span class="text-xs text-white bg-blue-600 px-3 py-1 rounded-full shadow-lg font-bold">SSO</span>
+<span class="text-xs text-white bg-blue-600 px-3 py-1 rounded-full shadow-lg font-bold">MFA</span>
+</div>
+</div>
+<!-- Flow Animation Downwards -->
+<div class="auth-flow-line">
+<div class="auth-flow-packet"></div>
+</div>
+<!-- Arrow Head -->
+<div class="absolute left-1/2 transform -translate-x-1/2 top-[calc(100%+60px)] w-0 h-0 border-l-[8px] border-l-transparent border-r-[8px] border-r-transparent border-t-[12px] border-t-blue-500/50"></div>
+</div>
+</div>
+<!-- Layer 2: SaaS Apps (Authenticated by Okta) -->
+<div class="relative z-10 w-full">
+<div class="layer-box layer-saas rounded-2xl p-6 mx-auto w-4/5 bg-gray-900/90 border-2 border-emerald-500/40 shadow-[0_0_30px_rgba(16,185,129,0.1)]">
+<div class="text-center border-b border-gray-700 pb-4 mb-5 flex justify-between items-center">
+<span class="text-sm text-emerald-400 font-tech uppercase tracking-[0.2em] font-bold">Authenticated Apps</span>
+<span class="text-xs text-gray-400 bg-gray-800 px-2 py-1 rounded flex items-center border border-gray-700">
+<i class="fa-solid fa-lock text-emerald-500 mr-2"></i>Secured by Okta
+                    </span>
+</div>
+<div class="flex justify-around items-center px-4">
+<!-- App 1 -->
+<div class="text-center group transition-transform hover:-translate-y-1 duration-300">
+<div class="w-16 h-16 bg-gray-800 rounded-xl flex items-center justify-center mb-3 border border-gray-700 group-hover:border-emerald-500 transition-colors shadow-lg relative overflow-hidden">
+<div class="absolute inset-0 bg-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<i class="fa-brands fa-slack text-white text-3xl z-10"></i>
+</div>
+<p class="text-xs text-gray-300 font-bold font-tech">Slack</p>
+</div>
+<!-- App 2 -->
+<div class="text-center group transition-transform hover:-translate-y-1 duration-300">
+<div class="w-16 h-16 bg-gray-800 rounded-xl flex items-center justify-center mb-3 border border-gray-700 group-hover:border-blue-500 transition-colors shadow-lg relative overflow-hidden">
+<div class="absolute inset-0 bg-blue-500/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<i class="fa-brands fa-jira text-blue-400 text-3xl z-10"></i>
+</div>
+<p class="text-xs text-gray-300 font-bold font-tech">Jira</p>
+</div>
+<!-- App 3 -->
+<div class="text-center group transition-transform hover:-translate-y-1 duration-300">
+<div class="w-16 h-16 bg-gray-800 rounded-xl flex items-center justify-center mb-3 border border-gray-700 group-hover:border-white transition-colors shadow-lg relative overflow-hidden">
+<div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+<i class="fa-brands fa-github text-white text-3xl z-10"></i>
+</div>
+<p class="text-xs text-gray-300 font-bold font-tech">GitHub</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<script>
+        // Tech Background Animation (Grid + Particles)
+        const canvas = document.getElementById('bgCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        const particles = [];
+        const particleCount = 25;
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2;
+                this.speedX = Math.random() * 0.2 - 0.1;
+                this.speedY = Math.random() * 0.2 - 0.1;
+                this.opacity = Math.random() * 0.5;
+            }
+
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+
+                if (this.x < 0) this.x = canvas.width;
+                if (this.x > canvas.width) this.x = 0;
+                if (this.y < 0) this.y = canvas.height;
+                if (this.y > canvas.height) this.y = 0;
+            }
+
+            draw() {
+                ctx.fillStyle = `rgba(168, 85, 247, ${this.opacity})`; // Purple particles
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < particleCount; i++) {
+            particles.push(new Particle());
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            
+            // Draw Grid
+            ctx.strokeStyle = 'rgba(30, 41, 59, 0.2)';
+            ctx.lineWidth = 1;
+            const step = 40;
+            
+            for(let x = 0; x <= canvas.width; x += step) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, canvas.height);
+                ctx.stroke();
+            }
+            
+            for(let y = 0; y <= canvas.height; y += step) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(canvas.width, y);
+                ctx.stroke();
+            }
+
+            // Draw Particles
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>
