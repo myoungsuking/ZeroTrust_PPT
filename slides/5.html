@@ -138,7 +138,7 @@
 </head>
 <body style="">
 <!-- Main Slide Container with Inline Fixed Dimensions -->
-<div class="slide-container relative w-[1280px] h-[720px]" id="slideContainer">
+<div class="slide-container relative w-[1280px] h-[720px] flex flex-col p-12" id="slideContainer">
 <!-- Canvases -->
 <canvas height="720" id="bgCanvas" width="1280"></canvas>
 <canvas height="720" id="linesCanvas" width="1280"></canvas>
@@ -147,7 +147,7 @@
 <img alt="HIPERLAB Logo" class="h-12 w-auto object-contain opacity-90" src="../assets/image-Photoroom.png"/>
 </div>
 <!-- Header -->
-<div class="absolute top-12 left-12 z-40 flex flex-col items-start">
+<div class="z-10 flex flex-col mb-6">
 <h2 class="font-tech text-cyan-400 tracking-[0.2em] text-lg font-bold uppercase mb-1">
                 Zero Trust Architecture
             </h2>
@@ -155,12 +155,9 @@
                 전체 아키텍처 개요
             </h1>
 <div class="h-1 w-20 bg-cyan-500 rounded-full shadow-[0_0_10px_rgba(34,211,238,0.6)]"></div>
-<p class="mt-4 text-gray-400 text-lg">
-                Identity &amp; Policy 중심 통제 구조
-            </p>
 </div>
 <!-- Diagram Elements -->
-<div class="diagram-layer">
+<div class="diagram-layer flex-1">
 <!-- Central Hub: Identity & Policy -->
 <div class="hub hub-glow animate-pulse-slow" id="hubElement">
 <!-- Badge -->
